@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes("prozee.proc.Foo")
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_9)
 @AutoService(Processor.class)
 public class FooProcessor extends AbstractProcessor {
 
@@ -74,6 +74,11 @@ public class FooProcessor extends AbstractProcessor {
         out.println(";");
         out.println();
       }
+      String generatorClassName = "value = \"" + this.getClass().getCanonicalName()  + "\"";
+      String generatorDate = "";
+      //@Generated(value = "", date = "", comments = "")
+      out.println("@javax.annotation.processing.Generated(" + generatorClassName +
+        ")");
 
       out.print("public class ");
       out.print(builderSimpleClassName);

@@ -21,6 +21,7 @@ repositories {
 }
 
 dependencies {
+  annotationProcessor 'com.google.auto.service:auto-service:1.0.1'
   // Use the latest Groovy version for Spock testing
   testImplementation 'org.codehaus.groovy:groovy:3.0.9'
 
@@ -40,4 +41,9 @@ dependencies {
 tasks.named('test') {
   // Use JUnit Platform for unit tests.
   useJUnitPlatform()
+}
+
+java {
+  sourceCompatibility = JavaVersion.toVersion("9")
+  targetCompatibility = JavaVersion.toVersion("9")
 }

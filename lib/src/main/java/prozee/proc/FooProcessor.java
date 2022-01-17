@@ -17,9 +17,34 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes("prozee.proc.Foo")
-@SupportedSourceVersion(SourceVersion.RELEASE_9)
+@SupportedSourceVersion(SourceVersion.RELEASE_17)
 @AutoService(Processor.class)
 public class FooProcessor extends AbstractProcessor {
+  String template = """
+    package %s;
+        
+    @javax.annotation.processing.Generated(%s)
+    public class %sBuilder {
+        
+        private Person object = new Person();
+        
+        public Person build() {
+            return object;
+        }
+        
+        public PersonBuilder setName(java.lang.String value) {
+            object.setName(value);
+            return this;
+        }
+        
+        public PersonBuilder setAge(int value) {
+            object.setAge(value);
+            return this;
+        }
+        
+    }
+        
+    """;
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -54,6 +79,9 @@ public class FooProcessor extends AbstractProcessor {
   }
 
   private void writeBuilderFile(String className, Map<String, String> setterMap) throws IOException {
+    String v1 = "1";
+    String v2 = "2";
+    String ssds = "s%sdddd%s".formatted(v1, v2);
 
     String packageName = null;
     int lastDot = className.lastIndexOf('.');

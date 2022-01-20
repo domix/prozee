@@ -26,30 +26,23 @@ public class FooProcessor extends AbstractProcessor {
     @javax.annotation.processing.Generated(%s)
     public class %sBuilder {
         
-        private Person object = new Person();
+        private %s object = new Person();
         
-        public Person build() {
+        public %s build() {
             return object;
         }
         
-        public PersonBuilder setName(java.lang.String value) {
-            object.setName(value);
+        public %sBuilder set%s(%s value) {
+            object.set%s(value);
             return this;
         }
         
-        public PersonBuilder setAge(int value) {
-            object.setAge(value);
-            return this;
-        }
-        
-    }
-        
+    }        
     """;
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
     for (TypeElement annotation : annotations) {
-
       Set<? extends Element> annotatedElements = roundEnv.getElementsAnnotatedWith(annotation);
 
       Map<Boolean, List<Element>> annotatedMethods = annotatedElements.stream().collect(Collectors.partitioningBy(element -> ((ExecutableType) element.asType()).getParameterTypes().size() == 1 && element.getSimpleName().toString().startsWith("set")));
@@ -102,11 +95,10 @@ public class FooProcessor extends AbstractProcessor {
         out.println(";");
         out.println();
       }
-      String generatorClassName = "value = \"" + this.getClass().getCanonicalName()  + "\"";
+      String generatorClassName = "value = \"" + this.getClass().getCanonicalName() + "\"";
       String generatorDate = "";
       //@Generated(value = "", date = "", comments = "")
-      out.println("@javax.annotation.processing.Generated(" + generatorClassName +
-        ")");
+      out.println("@javax.annotation.processing.Generated(" + generatorClassName + ")");
 
       out.print("public class ");
       out.print(builderSimpleClassName);

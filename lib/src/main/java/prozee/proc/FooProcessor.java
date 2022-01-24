@@ -52,7 +52,8 @@ public class FooProcessor extends AbstractProcessor {
       List<Element> setters = annotatedMethods.get(true);
       List<Element> otherMethods = annotatedMethods.get(false);
 
-      otherMethods.forEach(element -> processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "@BuilderProperty must be applied to a setXxx method with a single argument", element));
+      otherMethods.forEach(element -> processingEnv.getMessager().
+        printMessage(Diagnostic.Kind.ERROR, "@BuilderProperty must be applied to a setXxx method with a single argument", element));
 
       if (setters.isEmpty()) {
         continue;
@@ -60,7 +61,8 @@ public class FooProcessor extends AbstractProcessor {
 
       String className = ((TypeElement) setters.get(0).getEnclosingElement()).getQualifiedName().toString();
 
-      Map<String, String> setterMap = setters.stream().collect(Collectors.toMap(setter -> setter.getSimpleName().toString(), setter -> ((ExecutableType) setter.asType()).getParameterTypes().get(0).toString()));
+      final var setterMap = setters.stream()
+        .collect(Collectors.toMap(setter -> setter.getSimpleName().toString(), setter -> ((ExecutableType) setter.asType()).getParameterTypes().get(0).toString()));
 
       try {
         writeBuilderFile(className, setterMap);

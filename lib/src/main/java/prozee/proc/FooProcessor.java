@@ -20,24 +20,26 @@ import java.util.stream.Collectors;
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 @AutoService(Processor.class)
 public class FooProcessor extends AbstractProcessor {
-  String template = """
+  String setterTemplate = """
+        public %s %s(%s value) {
+            object.%s(value);
+            return this;
+        }
+    """;
+  String classTemplate = """
     package %s;
         
-    @javax.annotation.processing.Generated(%s)
-    public class %sBuilder {
+    @javax.annotation.processing.Generated(value = "%s")
+    public class %s {
         
-        private %s object = new Person();
+        private %s object = new %s();
         
         public %s build() {
             return object;
         }
         
-        public %sBuilder set%s(%s value) {
-            object.set%s(value);
-            return this;
-        }
-        
-    }        
+    %s
+    }
     """;
 
   @Override
@@ -72,10 +74,6 @@ public class FooProcessor extends AbstractProcessor {
   }
 
   private void writeBuilderFile(String className, Map<String, String> setterMap) throws IOException {
-    String v1 = "1";
-    String v2 = "2";
-    String ssds = "s%sdddd%s".formatted(v1, v2);
-
     String packageName = null;
     int lastDot = className.lastIndexOf('.');
     if (lastDot > 0) {
@@ -88,60 +86,21 @@ public class FooProcessor extends AbstractProcessor {
 
     JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(builderClassName);
     try (PrintWriter out = new PrintWriter(builderFile.openWriter())) {
-
-      if (packageName != null) {
-        out.print("package ");
-        out.print(packageName);
-        out.println(";");
-        out.println();
-      }
-      String generatorClassName = "value = \"" + this.getClass().getCanonicalName() + "\"";
+      String generatorClassName = this.getClass().getCanonicalName();
       String generatorDate = "";
-      //@Generated(value = "", date = "", comments = "")
-      out.println("@javax.annotation.processing.Generated(" + generatorClassName + ")");
 
-      out.print("public class ");
-      out.print(builderSimpleClassName);
-      out.println(" {");
-      out.println();
+      String setters = setterMap.entrySet().stream()
+        .map(entry -> {
+          String methodName = entry.getKey();
+          String argumentType = entry.getValue();
 
-      out.print("    private ");
-      out.print(simpleClassName);
-      out.print(" object = new ");
-      out.print(simpleClassName);
-      out.println("();");
-      out.println();
+          return setterTemplate.formatted(builderSimpleClassName, methodName, argumentType, methodName);
+        })
+        .collect(Collectors.joining());
 
-      out.print("    public ");
-      out.print(simpleClassName);
-      out.println(" build() {");
-      out.println("        return object;");
-      out.println("    }");
-      out.println();
+      String formatted = classTemplate.formatted(packageName, generatorClassName, builderSimpleClassName, simpleClassName, simpleClassName, simpleClassName, setters);
 
-      setterMap.entrySet().forEach(setter -> {
-        String methodName = setter.getKey();
-        String argumentType = setter.getValue();
-
-        out.print("    public ");
-        out.print(builderSimpleClassName);
-        out.print(" ");
-        out.print(methodName);
-
-        out.print("(");
-
-        out.print(argumentType);
-        out.println(" value) {");
-        out.print("        object.");
-        out.print(methodName);
-        out.println("(value);");
-        out.println("        return this;");
-        out.println("    }");
-        out.println();
-      });
-
-      out.println("}");
-
+      out.println(formatted);
     }
   }
 }
